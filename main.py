@@ -16,8 +16,9 @@ class Application(QMainWindow):
 
     def __init__(self):
         super(Application, self).__init__()
-        self.data = None
         self.matrix = []
+        self.matrix_size = None
+        self.data = None
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.show()
@@ -37,9 +38,9 @@ class Application(QMainWindow):
         try:
             self.get_key_matrix(self.ui.line_key.text())
             if self.ui.btn_enc.isChecked():
-                self.data = self.crypt_text(self.data, self.Action.ENCRYPT.value)
+                self.data = self.crypt_text(self.Action.ENCRYPT.value)
             elif self.ui.btn_dec.isChecked():
-                self.data = self.crypt_text(self.data, self.Action.DECRYPT.value)
+                self.data = self.crypt_text(self.Action.DECRYPT.value)
         except ValueError as e:
             ...
         self.ui.cipher_text.setText(str(self.data))
@@ -65,28 +66,59 @@ class Application(QMainWindow):
         self.fill_key_matrix()
 
     def fill_key_matrix(self):
-        size = int(pow(len(self.matrix), 0.5))
-        self.ui.abc_table.setColumnCount(size)
-        self.ui.abc_table.setRowCount(size)
-        for i in range(size):
-            for j in range(size):
-                self.ui.abc_table.setItem(i, j, QTableWidgetItem(self.matrix[i * size + j].upper()))
+        self.matrix_size = int(pow(len(self.matrix), 0.5))
+        self.ui.abc_table.setColumnCount(self.matrix_size)
+        self.ui.abc_table.setRowCount(self.matrix_size)
+        for i in range(self.matrix_size):
+            for j in range(self.matrix_size):
+                self.ui.abc_table.setItem(i, j, QTableWidgetItem(self.matrix[i * self.matrix_size + j].upper()))
         self.ui.abc_table.resizeRowsToContents()
         self.ui.abc_table.resizeColumnsToContents()
 
-    def crypt_text(self, data, choice):
-        # self.get_plaintext()
-        # extended_key = self.get_extended_key(data)
+    def get_plaintext(self):
+        result = []
+        plaintext = self.ui.plain_text.toPlainText().lower().replace(" ", "")
+        if not set(plaintext).issubset(self.matrix):
+            return QMessageBox.information(self, "Ошибка", "Введите корректный ключ", QMessageBox.Ok)
+        for i in range(0, len(plaintext) - 1, 2):
+            if plaintext[i] == plaintext[i + 1]:
+                if plaintext[i] == "x" and plaintext[i + 1] == "x":
+                    plaintext = plaintext[:i + 1] + "o" + plaintext[i + 1:]
+                else:
+                    plaintext = plaintext[:i + 1] + "x" + plaintext[i + 1:]
+        if len(plaintext) % 2:
+            if plaintext[-1] == "x":
+                plaintext += "o"
+            else:
+                plaintext += "x"
+        for i in range(0, len(plaintext) - 1, 2):
+            result.append(plaintext[i:i + 2])
+        return result
+
+    def calculate_indexes(self, indexes, choice):
+        index_x, index_y = indexes
+        if index_x[0] == index_y[0]:
+            new_index_x = (index_x[0], ((index_x[1] + 1 * choice) + self.matrix_size) % self.matrix_size)
+            new_index_y = (index_y[0], ((index_y[1] + 1 * choice) + self.matrix_size) % self.matrix_size)
+        elif index_x[1] == index_y[1]:
+            new_index_x = (((index_x[0] + 1 * choice) + self.matrix_size) % self.matrix_size, index_x[1])
+            new_index_y = (((index_y[0] + 1 * choice) + self.matrix_size) % self.matrix_size, index_y[1])
+        else:
+            new_index_x = (index_x[0], index_y[1])
+            new_index_y = (index_y[0], index_x[1])
+        return new_index_x, new_index_y
+
+    def crypt_text(self, choice):
+        bigrams = self.get_plaintext()
+        size = int(pow(len(self.matrix), 0.5))
         text = ''
-        for i, char in enumerate(data):
-            is_found = False
-            for abc in self.abc:
-                if char.lower() in abc:
-                    to_add = abc[(len(abc) + abc.index(char.lower()) - choice * extended_key[i]) % len(abc)]
-                    text += to_add.upper() if char.isupper() else to_add.lower()
-                    is_found = True
-            if not is_found:
-                text += char
+        for item in bigrams:
+            x, y = item[0], item[1]
+            index_x = (self.matrix.index(x) // self.matrix_size, self.matrix.index(x) % self.matrix_size)
+            index_y = (self.matrix.index(y) // self.matrix_size, self.matrix.index(y) % self.matrix_size)
+            new_index_x, new_index_y = self.calculate_indexes((index_x, index_y), choice)
+            text += self.matrix[new_index_x[0] * self.matrix_size + new_index_x[1]]
+            text += self.matrix[new_index_y[0] * self.matrix_size + new_index_y[1]]
         return text
 
     def open(self):
