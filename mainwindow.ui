@@ -107,17 +107,17 @@
      <string>Расшифровать</string>
     </property>
    </widget>
-   <widget class="QTableWidget" name="abcTable">
-    <property name="geometry">
-     <rect>
-      <x>380</x>
-      <y>10</y>
-      <width>201</width>
-      <height>171</height>
-     </rect>
-    </property>
-    <property name="minimumSize">
-     <size>
+   <widget class="QTableWidget" name="abc_table">
+       <property name="geometry">
+           <rect>
+               <x>380</x>
+               <y>10</y>
+               <width>201</width>
+               <height>171</height>
+           </rect>
+       </property>
+       <property name="minimumSize">
+           <size>
       <width>191</width>
       <height>171</height>
      </size>
