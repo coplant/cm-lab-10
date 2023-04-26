@@ -1,7 +1,7 @@
 import string
 from enum import Enum
 
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox, QTableWidgetItem
 from ui_mainwindow import Ui_MainWindow
 
 
@@ -62,8 +62,20 @@ class Application(QMainWindow):
             self.matrix.append(".")
             self.matrix.append(",")
             self.matrix.append(" ")
+        self.fill_key_matrix()
+
+    def fill_key_matrix(self):
+        size = int(pow(len(self.matrix), 0.5))
+        self.ui.abc_table.setColumnCount(size)
+        self.ui.abc_table.setRowCount(size)
+        for i in range(size):
+            for j in range(size):
+                self.ui.abc_table.setItem(i, j, QTableWidgetItem(self.matrix[i * size + j].upper()))
+        self.ui.abc_table.resizeRowsToContents()
+        self.ui.abc_table.resizeColumnsToContents()
 
     def crypt_text(self, data, choice):
+        # self.get_plaintext()
         # extended_key = self.get_extended_key(data)
         text = ''
         for i, char in enumerate(data):
