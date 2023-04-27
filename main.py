@@ -98,11 +98,11 @@ class Application(QMainWindow):
     def calculate_indexes(self, indexes, choice):
         index_x, index_y = indexes
         if index_x[0] == index_y[0]:
-            new_index_x = (index_x[0], ((index_x[1] + 1 * choice) + self.matrix_size) % self.matrix_size)
-            new_index_y = (index_y[0], ((index_y[1] + 1 * choice) + self.matrix_size) % self.matrix_size)
+            new_index_x = (index_x[0], ((index_x[1] - 1 * choice) + self.matrix_size) % self.matrix_size)
+            new_index_y = (index_y[0], ((index_y[1] - 1 * choice) + self.matrix_size) % self.matrix_size)
         elif index_x[1] == index_y[1]:
-            new_index_x = (((index_x[0] + 1 * choice) + self.matrix_size) % self.matrix_size, index_x[1])
-            new_index_y = (((index_y[0] + 1 * choice) + self.matrix_size) % self.matrix_size, index_y[1])
+            new_index_x = (((index_x[0] - 1 * choice) + self.matrix_size) % self.matrix_size, index_x[1])
+            new_index_y = (((index_y[0] - 1 * choice) + self.matrix_size) % self.matrix_size, index_y[1])
         else:
             new_index_x = (index_x[0], index_y[1])
             new_index_y = (index_y[0], index_x[1])
