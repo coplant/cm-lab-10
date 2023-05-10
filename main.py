@@ -80,12 +80,22 @@ class Application(QMainWindow):
         plaintext = self.ui.plain_text.toPlainText().lower().replace(" ", "")
         if not set(plaintext).issubset(self.matrix):
             return QMessageBox.information(self, "Ошибка", "Введите корректный ключ", QMessageBox.Ok)
-        for i in range(0, len(plaintext) - 1, 2):
+
+        flag = True
+        i = 0
+        while flag:
+            if not len(plaintext) > i + 1:
+                flag = False
+                break
             if plaintext[i] == plaintext[i + 1]:
                 if plaintext[i] == "x" and plaintext[i + 1] == "x":
                     plaintext = plaintext[:i + 1] + "o" + plaintext[i + 1:]
+                elif plaintext[i] == "х" and plaintext[i + 1] == "х":
+                    plaintext = plaintext[:i + 1] + "о" + plaintext[i + 1:]
                 else:
                     plaintext = plaintext[:i + 1] + "x" + plaintext[i + 1:]
+            i += 2
+
         if len(plaintext) % 2:
             if plaintext[-1] == "x":
                 plaintext += "o"
